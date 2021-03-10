@@ -18,6 +18,7 @@ jobs:
   deploy:
     name: Build and deploy
     runs-on: ubuntu-latest
+    environment: BlendoBot Host
     needs: tests
     steps:
       - name: Checkout repo
