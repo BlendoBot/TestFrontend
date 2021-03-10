@@ -37,8 +37,13 @@ jobs:
           tar -zcf TestFrontendDeploy.tar.gz TestFrontend/
         shell: bash
       - name: Transfer to host
-        run: scp 
-        shell: bash
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          source: "TestFrontendDeploy.tar.gz"
+          target: "/home/${{ secrets.DEPLOY_USERNAME }}/"
       - name: Install onto host
         uses: appleboy/ssh-action@master
         with:
