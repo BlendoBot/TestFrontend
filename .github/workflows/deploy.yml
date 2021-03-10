@@ -34,8 +34,8 @@ jobs:
         run: |
           mkdir TestFrontendDeploy
           mkdir TestFrontendDeploy/bin
-          cp -ar TestFrontend/bin/Release/net5.0/ TestFrontendDeploy/bin
-          tar -zcf TestFrontendDeploy.tar.gz TestFrontend/
+          cp -ar TestFrontend/bin/Release/net5.0/* TestFrontendDeploy/bin
+          tar -zcf TestFrontendDeploy.tar.gz TestFrontendDeploy/
         shell: bash
       - name: Transfer to host
         uses: appleboy/scp-action@master
@@ -54,8 +54,7 @@ jobs:
           script: |
             rm -rf TestFrontendDeploy/bin
             tar -xf TestFrontendDeploy.tar.gz
-            printf "
-            [Unit]
+            printf "[Unit]
             Description=BlendoBot Test Frontend
             Requires=network.target
             After=network.target
