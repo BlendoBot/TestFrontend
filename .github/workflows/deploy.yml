@@ -65,11 +65,11 @@ jobs:
             WorkingDirectory=/home/%s/TestFrontendDeploy
             Restart=on-failure
             RestartSec=5s
-            ExecStart=dotnet /home/%s/TestFrontendDeploy/bin/TestFrontend.dll
+            ExecStart=/home/%s/dotnet/dotnet /home/%s/TestFrontendDeploy/bin/TestFrontend.dll
 
             [Install]
             WantedBy=multi-user.target
-            " ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} | sudo tee /etc/systemd/system/testfrontend.service
+            " ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} | sudo tee /etc/systemd/system/testfrontend.service
             sudo systemctl daemon-reload
             sudo systemctl enable testfrontend.service
             sudo systemctl restart testfrontend.service
