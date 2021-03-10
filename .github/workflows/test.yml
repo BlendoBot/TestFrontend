@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - '*'
-
 jobs:
   tests:
     name: Tests
@@ -15,4 +14,4 @@ jobs:
         dotnet-version: '5.0.x'
     - name: Run Tests
       run: dotnet test
-      shell: pwsh
+      shell: bash

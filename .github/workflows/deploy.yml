@@ -14,16 +14,57 @@ jobs:
         dotnet-version: '5.0.x'
     - name: Run Tests
       run: dotnet test
-      shell: pwsh
-  # deploy:
-  #   name: Build and Deploy
-  #   runs-on: ubuntu-latest
-  #   needs: tests
-  #   steps:
-  #     - name: Checkout repo
-  #       uses: actions/checkout@v2
+      shell: bash
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+      - name: Build
+        run: dotnet build -c Release
+        shell: bash
+      - name: Zip up
+        run: |
+          mkdir TestFrontendDeploy
+          mkdir TestFrontendDeploy/bin
+          cp -ar TestFrontend/bin/Release/net5.0/ TestFrontendDeploy/bin
+          tar -zcf TestFrontendDeploy.tar.gz TestFrontend/
+        shell: bash
+      - name: Transfer to host
+        run: scp 
+        shell: bash
+      - name: Install onto host
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            rm -rf TestFrontendDeploy/bin
+            tar -xf TestFrontendDeploy.tar.gz
+            printf "
+            [Unit]
+            Description=BlendoBot Test Frontend
+            Requires=Network.target
+            After=Network.target
 
-  #     - name: Setup dotnet
-  #       uses: actions/setup-dotnet@v1
-  #       with:
-  #         dotnet-version: '5.0.x'
+            [Service]
+            User=%s
+            Group=%s
+            WorkingDirectory=/home/%s/TestFrontendDeploy
+            Restart=on-failure
+            RestartSec=5s
+            ExecStart=dotnet /home/%s/TestFrontendDeploy/bin/TestFrontend.dll
+
+            [Install]
+            WantedBy=multi-user.target
+            " ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} ${{ secrets.DEPLOY_USERNAME }} | sudo tee /etc/systemd/system/testfrontend.service
+            sudo systemctl daemon-reload
+            sudo systemctl enable testfrontend.service
+            sudo systemctl restart testfrontend.service
